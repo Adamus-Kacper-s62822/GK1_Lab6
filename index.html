@@ -1,75 +1,81 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-  <meta charset="UTF-8" />
-  <title>Biały Hetman (Królowa) - Three.js</title>
-  <style>
-    body {
-      margin: 0;
-      overflow: hidden;
-      background: #1e1e1e;
-    }
-  </style>
-  <script type="importmap">
-  {
-    "imports": {
-      "three": "https://unpkg.com/three@0.184.0/build/three.module.js",
-      "three/addons/": "https://unpkg.com/three@0.184.0/examples/jsm/"
-    }
+<meta charset="UTF-8" />
+<title>Biały Hetman (Królowa) - Three.js</title>
+
+<style>
+body {
+margin: 0;
+overflow: hidden;
+background: #1e1e1e;
+}
+</style>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.184.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.184.0/examples/jsm/"
   }
-  </script>
+}
+</script>
 </head>
+
 <body>
+
 <script type="module">
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-// --- SCENA I RENDERER ---
 const scene = new THREE.Scene();
 
-const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-camera.position.set(0, 6, 12); // Kamera na wprost, lekko z góry
+const camera = new THREE.PerspectiveCamera(
+45,
+window.innerWidth / window.innerHeight,
+0.1,
+1000
+);
+
+camera.position.set(0, 6, 12);
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
+
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setClearColor(0x1e1e1e);
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
 document.body.appendChild(renderer.domElement);
 
 const controls = new OrbitControls(camera, renderer.domElement);
-controls.enableDamping = true;
-controls.target.set(0, 3, 0); // Środek obrotu kamery na środku figury
 
-// --- MATERIAŁ ---
-// Solidny, gładki materiał przypominający kość słoniową lub polerowany plastik
+controls.enableDamping = true;
+controls.target.set(0, 3, 0);
+
 const whiteMaterial = new THREE.MeshStandardMaterial({
-  color: 0xf4f4f4,
-  roughness: 0.2, // Lekki połysk
-  metalness: 0.05
+color: 0xf4f4f4,
+roughness: 0.2,
+metalness: 0.05
 });
 
 const group = new THREE.Group();
+
 scene.add(group);
 
-// --- 1. PROFIL HETMANA (LatheGeometry) ---
-// Rysujemy prawą połowę profilu figury, od dołu (y=0) do góry
 const points = [];
 
-// Baza (podstawa)
 points.push(new THREE.Vector2(0, 0));
 points.push(new THREE.Vector2(1.6, 0));
 points.push(new THREE.Vector2(1.6, 0.2));
 points.push(new THREE.Vector2(1.3, 0.4));
 points.push(new THREE.Vector2(1.4, 0.6));
 
-// Talia (płynne, wcięte przejście)
 points.push(new THREE.Vector2(0.9, 1.2));
 points.push(new THREE.Vector2(0.7, 1.8));
 points.push(new THREE.Vector2(0.65, 2.5));
 points.push(new THREE.Vector2(0.7, 3.2));
 
-// Kołnierz (ozdobne pierścienie pod koroną)
 points.push(new THREE.Vector2(1.15, 3.6));
 points.push(new THREE.Vector2(1.15, 3.8));
 points.push(new THREE.Vector2(0.75, 4.0));
@@ -77,89 +83,125 @@ points.push(new THREE.Vector2(1.25, 4.2));
 points.push(new THREE.Vector2(1.25, 4.4));
 points.push(new THREE.Vector2(0.8, 4.6));
 
-// Korona - kielich rozszerzający się ku górze
 points.push(new THREE.Vector2(0.9, 4.8));
-points.push(new THREE.Vector2(1.4, 5.6)); // Zewnętrzna górna krawędź korony
-points.push(new THREE.Vector2(1.2, 5.6)); // Wewnętrzna krawędź (nadaje grubość)
+points.push(new THREE.Vector2(1.4, 5.6));
+points.push(new THREE.Vector2(1.2, 5.6));
 
-// Wnętrze korony i wybrzuszenie na środku
-points.push(new THREE.Vector2(0.6, 4.9)); // Zjeżdżamy na dół do wnętrza kielicha
-points.push(new THREE.Vector2(0.4, 5.1)); // Środkowa kopułka rośnie
-points.push(new THREE.Vector2(0, 5.2));   // Zamknięcie na osi symetrii (X=0)
+points.push(new THREE.Vector2(0.6, 4.9));
+points.push(new THREE.Vector2(0.4, 5.1));
+points.push(new THREE.Vector2(0, 5.2));
 
-// Tworzymy bryłę obrotową z narysowanego profilu
-// 64 segmenty dają bardzo gładki okrąg
 const queenGeometry = new THREE.LatheGeometry(points, 64);
-const queenMesh = new THREE.Mesh(queenGeometry, whiteMaterial);
+
+const queenMesh = new THREE.Mesh(
+queenGeometry,
+whiteMaterial
+);
+
 queenMesh.castShadow = true;
 queenMesh.receiveShadow = true;
+
 group.add(queenMesh);
 
-// --- 2. DETALE KORONY (Ozdobne kulki) ---
-// Prawdziwy hetman ma wypustki na krawędzi korony. Dodamy małe sfery w kółku.
-const crownBallsCount = 10; // Ilość wypustek
-const radius = 1.3; // Promień ułożenia kulek (pomiędzy 1.2 a 1.4 z profilu)
+const crownBallsCount = 10;
+const radius = 1.3;
 
 for (let i = 0; i < crownBallsCount; i++) {
-  const angle = (i / crownBallsCount) * Math.PI * 2;
-  const x = Math.cos(angle) * radius;
-  const z = Math.sin(angle) * radius;
-  
-  const ballMesh = new THREE.Mesh(new THREE.SphereGeometry(0.12, 16, 16), whiteMaterial);
-  // Y = 5.6 to wysokość krawędzi korony. Lekko zanurzamy kulkę (5.65)
-  ballMesh.position.set(x, 5.65, z);
-  ballMesh.castShadow = true;
-  group.add(ballMesh);
+
+const angle = (i / crownBallsCount) * Math.PI * 2;
+
+const x = Math.cos(angle) * radius;
+const z = Math.sin(angle) * radius;
+
+const ballMesh = new THREE.Mesh(
+new THREE.SphereGeometry(0.12, 16, 16),
+whiteMaterial
+);
+
+ballMesh.position.set(x, 5.65, z);
+
+ballMesh.castShadow = true;
+
+group.add(ballMesh);
 }
 
-// --- 3. ZWIEŃCZENIE HETMANA (Górna kulka) ---
-// Duża sferyczna korona na samym środku
-const topBall = new THREE.Mesh(new THREE.SphereGeometry(0.28, 32, 32), whiteMaterial);
-topBall.position.set(0, 5.4, 0); // Posadzona na środkowej kopułce (Y=5.2)
+const topBall = new THREE.Mesh(
+new THREE.SphereGeometry(0.28, 32, 32),
+whiteMaterial
+);
+
+topBall.position.set(0, 5.4, 0);
+
 topBall.castShadow = true;
+
 group.add(topBall);
 
-// --- OTOCZENIE I ŚWIATŁO ---
 const floor = new THREE.Mesh(
-  new THREE.PlaneGeometry(40, 40),
-  new THREE.MeshStandardMaterial({ color: 0x333333, roughness: 0.8 })
+new THREE.PlaneGeometry(40, 40),
+new THREE.MeshStandardMaterial({
+color: 0x333333,
+roughness: 0.8
+})
 );
+
 floor.rotation.x = -Math.PI / 2;
 floor.receiveShadow = true;
+
 scene.add(floor);
 
-// Miękkie oświetlenie ogólne
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+const ambientLight = new THREE.AmbientLight(
+0xffffff,
+0.5
+);
+
 scene.add(ambientLight);
 
-// Główne światło rzucające cienie
-const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
+const dirLight = new THREE.DirectionalLight(
+0xffffff,
+1.2
+);
+
 dirLight.position.set(6, 10, 8);
+
 dirLight.castShadow = true;
 dirLight.shadow.mapSize.width = 2048;
 dirLight.shadow.mapSize.height = 2048;
-dirLight.shadow.bias = -0.0005; // Poprawia dokładność cieni na małych detalach (np. kulkach)
+dirLight.shadow.bias = -0.0005;
+
 scene.add(dirLight);
 
-// Oświetlenie dopełniające z drugiej strony
-const fillLight = new THREE.PointLight(0xffffff, 0.4);
+const fillLight = new THREE.PointLight(
+0xffffff,
+0.4
+);
+
 fillLight.position.set(-6, 5, -6);
+
 scene.add(fillLight);
 
-// --- RENDER I ANIMACJA ---
 function animate() {
-  requestAnimationFrame(animate);
-  controls.update();
-  renderer.render(scene, camera);
+
+requestAnimationFrame(animate);
+
+controls.update();
+
+renderer.render(scene, camera);
 }
+
 animate();
 
-// Dopasowanie do okna
 window.addEventListener('resize', () => {
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
+
+camera.aspect = window.innerWidth / window.innerHeight;
+
+camera.updateProjectionMatrix();
+
+renderer.setSize(
+window.innerWidth,
+window.innerHeight
+);
 });
 </script>
+
 </body>
 </html>
